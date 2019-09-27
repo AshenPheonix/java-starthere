@@ -13,20 +13,21 @@ public class UserRoles extends Auditable implements Serializable
     @Id
     @ManyToOne
     @JoinColumn(name = "userid")
-    @JsonIgnoreProperties("userRoles")
+    @JsonIgnoreProperties("userroles")
     private User user;
 
     @Id
     @ManyToOne
     @JoinColumn(name = "roleid")
-    @JsonIgnoreProperties("userRoles")
+    @JsonIgnoreProperties("userroles")
     private Role role;
 
     public UserRoles()
     {
     }
 
-    public UserRoles(User user, Role role)
+    public UserRoles(User user,
+                     Role role)
     {
         this.user = user;
         this.role = role;
@@ -70,6 +71,13 @@ public class UserRoles extends Auditable implements Serializable
     @Override
     public int hashCode()
     {
-        return Objects.hash(getUser(), getRole());
+        return Objects.hash(getUser(),
+                            getRole());
+    }
+
+    @Override
+    public String toString()
+    {
+        return "UserRoles{" + "user=" + user.getUserid() + ", role=" + role.getRoleid() + '}';
     }
 }

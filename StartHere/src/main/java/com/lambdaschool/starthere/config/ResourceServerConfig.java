@@ -17,17 +17,49 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter
     @Override
     public void configure(ResourceServerSecurityConfigurer resources)
     {
-        resources.resourceId(RESOURCE_ID).stateless(false);
+        resources.resourceId(RESOURCE_ID)
+                 .stateless(false);
     }
 
     @Override
     public void configure(HttpSecurity http) throws Exception
     {
-        // http.anonymous().disable();
-        http.authorizeRequests().antMatchers("/", "/h2-console/**", "/swagger-resources/**", "/swagger-resources/configuration/ui", "/swagger-resources/configuration/security", "/swagger-resource/**", "/swagger-ui.html", "/v2/api-docs", "/webjars/**", "/createnewuser", "/otherapis/**").permitAll().antMatchers("/users/**", "/oauth/revoke-token").authenticated().antMatchers("/roles/**").hasAnyRole("ADMIN", "USER", "DATA").antMatchers("/actuator/**").hasAnyRole("ADMIN").and().exceptionHandling().accessDeniedHandler(new OAuth2AccessDeniedHandler());
+        // http.anonymous().disable(); // since we allow anonymous users to access Swagger
+                                       // and create a user account
+        http.authorizeRequests()
+            .antMatchers("/",
+                         "/h2-console/**",
+                         "/swagger-resources/**",
+                         "/swagger-resource/**",
+                         "/swagger-ui.html",
+                         "/v2/api-docs",
+                         "/webjars/**",
+                         "/createnewuser")
+            .permitAll()
+            .antMatchers("/users/**",
+                         "/oauth/revoke-token",
+                         "/logout")
+            .authenticated()
+            // restrict application data...
+            // .antMatchers("/books", "/authors").hasAnyRole("ADMIN", "USER", "DATA")
+            // .antMatchers("/data/**").hasAnyRole("ADMIN", "DATA")
+            //
+            // restrict based on HttpMethod and endpoint
+            // .antMatchers(HttpMethod.GET, "/users/user/**").hasAnyRole("USER")
+            .antMatchers("/roles/**",
+                         "/actuator/**")
+            .hasAnyRole("ADMIN")
+            .and()
+            .exceptionHandling()
+            .accessDeniedHandler(new OAuth2AccessDeniedHandler());
 
-        // http.requiresChannel().anyRequest().requiresSecure();
-        http.csrf().disable();
-        http.headers().frameOptions().disable();
+        // http.requiresChannel().anyRequest().requiresSecure(); // required for https
+        http.csrf()
+            .disable();
+        http.headers()
+            .frameOptions()
+            .disable();
+        http.logout()
+            .disable();
     }
 }

@@ -1,5 +1,6 @@
 package com.lambdaschool.starthere.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -30,19 +31,21 @@ public class User extends Auditable
     @OneToMany(mappedBy = "user",
                cascade = CascadeType.ALL)
     @JsonIgnoreProperties("user")
-    private List<UserRoles> userRoles = new ArrayList<>();
+    private List<UserRoles> userroles = new ArrayList<>();
 
     @OneToMany(mappedBy = "user",
                cascade = CascadeType.ALL,
                orphanRemoval = true)
     @JsonIgnoreProperties("user")
-    private List<Quote> quotes = new ArrayList<>();
+    private List<Useremail> useremails = new ArrayList<>();
 
     public User()
     {
     }
 
-    public User(String username, String password, List<UserRoles> userRoles)
+    public User(String username,
+                String password,
+                List<UserRoles> userRoles)
     {
         setUsername(username);
         setPassword(password);
@@ -50,7 +53,7 @@ public class User extends Auditable
         {
             ur.setUser(this);
         }
-        this.userRoles = userRoles;
+        this.userroles = userRoles;
     }
 
     public long getUserid()
@@ -70,7 +73,7 @@ public class User extends Auditable
 
     public void setUsername(String username)
     {
-        this.username = username;
+        this.username = username.toLowerCase();
     }
 
     public String getPassword()
@@ -89,36 +92,45 @@ public class User extends Auditable
         this.password = password;
     }
 
-    public List<UserRoles> getUserRoles()
+    public List<UserRoles> getUserroles()
     {
-        return userRoles;
+        return userroles;
     }
 
-    public void setUserRoles(List<UserRoles> userRoles)
+    public void setUserroles(List<UserRoles> userroles)
     {
-        this.userRoles = userRoles;
+        this.userroles = userroles;
     }
 
-    public List<Quote> getQuotes()
+    public List<Useremail> getUseremails()
     {
-        return quotes;
+        return useremails;
     }
 
-    public void setQuotes(List<Quote> quotes)
+    public void setUseremails(List<Useremail> useremails)
     {
-        this.quotes = quotes;
+        this.useremails = useremails;
     }
 
+    @JsonIgnore
     public List<SimpleGrantedAuthority> getAuthority()
     {
         List<SimpleGrantedAuthority> rtnList = new ArrayList<>();
 
-        for (UserRoles r : this.userRoles)
+        for (UserRoles r : this.userroles)
         {
-            String myRole = "ROLE_" + r.getRole().getName().toUpperCase();
+            String myRole = "ROLE_" + r.getRole()
+                                       .getName()
+                                       .toUpperCase();
             rtnList.add(new SimpleGrantedAuthority(myRole));
         }
 
         return rtnList;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "User{" + "userid=" + userid + ", username='" + username + '\'' + ", password='" + password + '\'' + ", userRoles=" + userroles + ", useremails=" + useremails + '}';
     }
 }

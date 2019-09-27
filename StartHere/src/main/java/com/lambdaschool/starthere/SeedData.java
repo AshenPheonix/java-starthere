@@ -1,9 +1,12 @@
 package com.lambdaschool.starthere;
 
-import com.lambdaschool.starthere.models.Quote;
+import com.github.javafaker.Faker;
+import com.github.javafaker.service.FakeValuesService;
+import com.github.javafaker.service.RandomService;
 import com.lambdaschool.starthere.models.Role;
 import com.lambdaschool.starthere.models.User;
 import com.lambdaschool.starthere.models.UserRoles;
+import com.lambdaschool.starthere.models.Useremail;
 import com.lambdaschool.starthere.services.RoleService;
 import com.lambdaschool.starthere.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 @Transactional
 @Component
@@ -37,38 +41,94 @@ public class SeedData implements CommandLineRunner
 
         // admin, data, user
         ArrayList<UserRoles> admins = new ArrayList<>();
-        admins.add(new UserRoles(new User(), r1));
-        admins.add(new UserRoles(new User(), r2));
-        admins.add(new UserRoles(new User(), r3));
-        User u1 = new User("admin", "password", admins);
-        u1.getQuotes().add(new Quote("A creative man is motivated by the desire to achieve, not by the desire to beat others", u1));
-        u1.getQuotes().add(new Quote("The question isn't who is going to let me; it's who is going to stop me.", u1));
+        admins.add(new UserRoles(new User(),
+                                 r1));
+        admins.add(new UserRoles(new User(),
+                                 r2));
+        admins.add(new UserRoles(new User(),
+                                 r3));
+        User u1 = new User("admin",
+                           "password",
+                           admins);
+        u1.getUseremails()
+          .add(new Useremail(u1,
+                             "admin@email.local"));
+        u1.getUseremails()
+          .add(new Useremail(u1,
+                             "admin@mymail.local"));
+
         userService.save(u1);
 
         // data, user
         ArrayList<UserRoles> datas = new ArrayList<>();
-        datas.add(new UserRoles(new User(), r3));
-        datas.add(new UserRoles(new User(), r2));
-        User u2 = new User("cinnamon", "1234567", datas);
+        datas.add(new UserRoles(new User(),
+                                r3));
+        datas.add(new UserRoles(new User(),
+                                r2));
+        User u2 = new User("cinnamon",
+                           "1234567",
+                           datas);
+        u2.getUseremails()
+          .add(new Useremail(u2,
+                             "cinnamon@mymail.local"));
+        u2.getUseremails()
+          .add(new Useremail(u2,
+                             "hops@mymail.local"));
+        u2.getUseremails()
+          .add(new Useremail(u2,
+                             "bunny@email.local"));
         userService.save(u2);
 
         // user
         ArrayList<UserRoles> users = new ArrayList<>();
-        users.add(new UserRoles(new User(), r2));
-        User u3 = new User("barnbarn", "ILuvM4th!", users);
-        u3.getQuotes().add(new Quote("Live long and prosper", u3));
-        u3.getQuotes().add(new Quote("The enemy of my enemy is the enemy I kill last", u3));
-        u3.getQuotes().add(new Quote("Beam me up", u3));
+        users.add(new UserRoles(new User(),
+                                r2));
+        User u3 = new User("barnbarn",
+                           "ILuvM4th!",
+                           users);
+        u3.getUseremails()
+          .add(new Useremail(u3,
+                             "barnbarn@email.local"));
         userService.save(u3);
 
         users = new ArrayList<>();
-        users.add(new UserRoles(new User(), r2));
-        User u4 = new User("Bob", "password", users);
+        users.add(new UserRoles(new User(),
+                                r2));
+        User u4 = new User("puttat",
+                           "password",
+                           users);
         userService.save(u4);
 
         users = new ArrayList<>();
-        users.add(new UserRoles(new User(), r2));
-        User u5 = new User("Jane", "password", users);
+        users.add(new UserRoles(new User(),
+                                r2));
+        User u5 = new User("misskitty",
+                           "password",
+                           users);
         userService.save(u5);
+
+        // using JavaFaker create a bunch of regular users
+        // https://www.baeldung.com/java-faker
+        // https://www.baeldung.com/regular-expressions-java
+
+        FakeValuesService fakeValuesService = new FakeValuesService(new Locale("en-US"),
+                                                                    new RandomService());
+        Faker nameFaker = new Faker(new Locale("en-US"));
+
+        for (int i = 0; i < 100; i++)
+        {
+            User fakeUser = new User();
+
+            users = new ArrayList<>();
+            users.add(new UserRoles(new User(),
+                                    r2));
+            fakeUser = new User(nameFaker.name().username(),
+                                "password",
+                                users);
+            fakeUser.getUseremails()
+                    .add(new Useremail(fakeUser,
+                                       fakeValuesService.bothify("????##@gmail.com")));
+            userService.save(fakeUser);
+        }
     }
 }
