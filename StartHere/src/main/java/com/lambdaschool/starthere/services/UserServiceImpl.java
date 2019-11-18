@@ -2,6 +2,7 @@ package com.lambdaschool.starthere.services;
 
 import com.lambdaschool.starthere.exceptions.ResourceFoundException;
 import com.lambdaschool.starthere.exceptions.ResourceNotFoundException;
+import com.lambdaschool.starthere.logging.Loggable;
 import com.lambdaschool.starthere.models.Role;
 import com.lambdaschool.starthere.models.User;
 import com.lambdaschool.starthere.models.UserRoles;
@@ -12,19 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Loggable
 @Service(value = "userService")
-public class UserServiceImpl implements UserDetailsService,
-        UserService
+public class UserServiceImpl implements UserService
 {
 
     @Autowired
@@ -32,20 +29,6 @@ public class UserServiceImpl implements UserDetailsService,
 
     @Autowired
     private RoleRepository rolerepos;
-
-    @Transactional
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException
-    {
-        User user = userrepos.findByUsername(username);
-        if (user == null)
-        {
-            throw new UsernameNotFoundException("Invalid username or password.");
-        }
-        return new org.springframework.security.core.userdetails.User(user.getUsername(),
-                                                                      user.getPassword(),
-                                                                      user.getAuthority());
-    }
 
     public User findUserById(long id) throws ResourceNotFoundException
     {
@@ -57,7 +40,8 @@ public class UserServiceImpl implements UserDetailsService,
     public List<User> findByNameContaining(String username,
                                            Pageable pageable)
     {
-        return userrepos.findByUsernameContainingIgnoreCase(username, pageable);
+        return userrepos.findByUsernameContainingIgnoreCase(username.toLowerCase(),
+                                                            pageable);
     }
 
     @Override
@@ -82,7 +66,7 @@ public class UserServiceImpl implements UserDetailsService,
     @Override
     public User findByName(String name)
     {
-        User uu = userrepos.findByUsername(name);
+        User uu = userrepos.findByUsername(name.toLowerCase());
         if (uu == null)
         {
             throw new ResourceNotFoundException("User name " + name + " not found!");
@@ -94,14 +78,15 @@ public class UserServiceImpl implements UserDetailsService,
     @Override
     public User save(User user)
     {
-        if (userrepos.findByUsername(user.getUsername()) != null)
+        if (userrepos.findByUsername(user.getUsername().toLowerCase()) != null)
         {
             throw new ResourceFoundException(user.getUsername() + " is already taken!");
         }
 
         User newUser = new User();
-        newUser.setUsername(user.getUsername());
+        newUser.setUsername(user.getUsername().toLowerCase());
         newUser.setPasswordNoEncrypt(user.getPassword());
+        newUser.setPrimaryemail(user.getPrimaryemail().toLowerCase());
 
         ArrayList<UserRoles> newRoles = new ArrayList<>();
         for (UserRoles ur : user.getUserroles())
@@ -142,7 +127,7 @@ public class UserServiceImpl implements UserDetailsService,
 
             if (user.getUsername() != null)
             {
-                currentUser.setUsername(user.getUsername());
+                currentUser.setUsername(user.getUsername().toLowerCase());
             }
 
             if (user.getPassword() != null)
@@ -150,10 +135,15 @@ public class UserServiceImpl implements UserDetailsService,
                 currentUser.setPasswordNoEncrypt(user.getPassword());
             }
 
+            if (user.getPrimaryemail() != null)
+            {
+                currentUser.setPrimaryemail(user.getPrimaryemail().toLowerCase());
+            }
+
             if (user.getUserroles()
                     .size() > 0)
             {
-                throw new ResourceFoundException("User Roles are not updated through User");
+                throw new ResourceFoundException("User Roles are not updated through User. See endpoint POST: users/user/{userid}/role/{roleid}");
             }
 
             if (user.getUseremails()

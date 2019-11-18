@@ -1,5 +1,6 @@
 package com.lambdaschool.starthere.controllers;
 
+import com.lambdaschool.starthere.logging.Loggable;
 import com.lambdaschool.starthere.models.User;
 import com.lambdaschool.starthere.models.UserMinimum;
 import com.lambdaschool.starthere.models.UserRoles;
@@ -23,6 +24,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Loggable
 @RestController
 public class OpenController
 {
@@ -34,11 +36,22 @@ public class OpenController
     @Autowired
     private RoleService roleService;
 
+    // Create the user and Return the access token
+    // http://localhost:2019/createnewuser
+    // Just create the user
+    // http://localhost:2019/createnewuser?access=false
+    //
+    // {
+    //     "username" : "Mojo",
+    //     "password" : "corgie",
+    //     "primaryemail" : "home@local.house"
+    // }
+
     @PostMapping(value = "/createnewuser",
                  consumes = {"application/json"},
                  produces = {"application/json"})
     public ResponseEntity<?> addNewUser(HttpServletRequest httpServletRequest,
-                                        @RequestParam(defaultValue = "false")
+                                        @RequestParam(defaultValue = "true")
                                                 boolean getaccess,
                                         @Valid
                                         @RequestBody
@@ -52,6 +65,7 @@ public class OpenController
 
         newuser.setUsername(newminuser.getUsername());
         newuser.setPassword(newminuser.getPassword());
+        newuser.setPrimaryemail(newminuser.getPrimaryemail());
 
         ArrayList<UserRoles> newRoles = new ArrayList<>();
         newRoles.add(new UserRoles(newuser,

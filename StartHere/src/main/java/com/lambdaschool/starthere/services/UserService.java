@@ -8,11 +8,10 @@ import java.util.List;
 
 public interface UserService
 {
-    UserDetails loadUserByUsername(String username);
-
     List<User> findAll(Pageable pageable);
 
-    List<User> findByNameContaining(String username, Pageable pageable);
+    List<User> findByNameContaining(String username,
+                                    Pageable pageable);
 
     User findUserById(long id);
 

@@ -1,13 +1,16 @@
 package com.lambdaschool.starthere.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.lambdaschool.starthere.logging.Loggable;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Objects;
 
+@Loggable
 @Entity
-@Table(name = "userroles")
+@Table(name = "userroles",
+       uniqueConstraints = {@UniqueConstraint(columnNames = {"userid", "roleid"})})
 public class UserRoles extends Auditable implements Serializable
 {
     @Id
